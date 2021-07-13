@@ -6,11 +6,6 @@ While this tool is to be used as the primary tool for editing HUDs, it cannot do
 
 N.B. **this software only works in readonly mode**. There are no edit features as of July 13th, 2021. Edit features will be introduced when the render pipeline is stable.
 
-## Features
-
-- [ ] Opening HUD for viewing
-- [ ] Opening HUD for editing
-
 ## Usage
 
 Open up a HUD in readonly mode:
@@ -20,7 +15,18 @@ $ go run github.com/dresswithpockets/PocketHud -- --root "path/to/my/hud" --read
 
 N.B. as noted in the foreword, this software only worked in readonly mode. Attempting to run PocketHud in editmode (or without the --readonly flag) will panic and close immediately.
 
+N.B.B. **this software is not production ready and is subject to sweeping changes at any moment.** Versions are likely to be incompatible between each other. Compatibility and long term support will be the end goal after v1.0.
+
+## Features
+
+- [ ] Opening HUD for viewing
+- [ ] Opening HUD for editing
+
+N.B. the roadmap has not been fleshed out, so this section is lacking for now.
+
 ## Building
+Built with Go 1.14.2. Not guaranteed to work on any other versions.
+
 Pull dependencies:
 
 ```sh
