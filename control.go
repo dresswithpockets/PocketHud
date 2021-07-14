@@ -2,7 +2,9 @@ package main
 
 import (
     . "github.com/ahmetb/go-linq"
+    "github.com/dresswithpockets/go-vgui"
     "github.com/faiface/pixel"
+    "math"
 )
 
 type Alignment int
@@ -20,6 +22,8 @@ const (
     AlignSouthWest
     AlignSouthEast
 )
+
+const FullSize = math.MaxInt16
 
 type RelativeTo int
 
@@ -45,13 +49,24 @@ type Position struct {
 }
 
 type Size struct {
-    width  int
-    height int
+    width  int16
+    height int16
+}
+
+type Bounds struct {
+    Position
+    Size
 }
 
 type VguiImage struct {
     name    string
     picture pixel.Picture
+}
+
+type ControlBuilder func(object *vgui.Object) Control
+
+type ControlProvider struct {
+    builders map[string]ControlBuilder
 }
 
 type Control interface {
@@ -79,9 +94,13 @@ type BaseControl struct {
     labelText       string
     textAlignment   Alignment
     textInset       Position
+    tabPosition     int
+    dullText        bool
+    brightText      bool
     image           *VguiImage
     paintBackground bool
     paintBorder     bool
+    _default         int
 
     parent   Control
     children []Control
@@ -90,7 +109,28 @@ type BaseControl struct {
     dirty          bool
     absoluteBounds pixel.Rect
 
-    // TODO: overrides (props with _override suffix)
+    baseOverride *BaseControl
+}
+
+func (c *ControlProvider) setBuilder(controlName string, builder ControlBuilder) {
+    c.builders[controlName] = builder
+}
+
+func (c *ControlProvider) resolveNewControlFromObject(object *vgui.Object) (Control, error) {
+    controlName, ok := object.Get("ControlName")
+    if !ok {
+        panic("ControlName not found on object when resolving new control from object. Default behaviour not well defined.")
+    }
+
+    if !controlName.IsValue {
+        panic("ControlName must always be a single value, not an object with properties.")
+    }
+
+    if builder, ok := c.builders[controlName.Value]; ok {
+        return builder(object), nil
+    }
+
+    return nil, &ErrUnknownControlName{controlName.Value}
 }
 
 func (c *BaseControl) zOrder() int {
@@ -160,10 +200,10 @@ func (c *BaseControl) recalculateBounds() {
 
     parentCenter := viewport.Center()
     parentSize := viewport.Size()
-    left := parentCenter.X - parentSize.X / 2
-    right := parentCenter.X + parentSize.Y / 2
-    top := parentCenter.Y - parentSize.Y / 2
-    bottom := parentCenter.Y + parentSize.Y / 2
+    left := parentCenter.X - parentSize.X/2
+    right := parentCenter.X + parentSize.Y/2
+    top := parentCenter.Y - parentSize.Y/2
+    bottom := parentCenter.Y + parentSize.Y/2
 
     var xpos, ypos float64
 
@@ -193,5 +233,22 @@ func (c *BaseControl) recalculateBounds() {
 
     xpos += float64(c.pos.x.value)
     ypos += float64(c.pos.y.value)
-    c.absoluteBounds = pixel.R(xpos, ypos, xpos + float64(c.size.width), ypos + float64(c.size.height))
+    c.absoluteBounds = pixel.R(xpos, ypos, xpos+float64(c.size.width), ypos+float64(c.size.height))
 }
+
+/*func defaultControlBuilder(t reflect.Type, object *vgui.Object) Control {
+    var control Control
+    t.AssignableTo(reflect.TypeOf(control))
+    value := reflect.New(t)
+    for i := 0; i < value.NumField(); i++ {
+        field := value.Field(i)
+    }
+    // TODO: parse object values into fields
+}
+
+func parseIntValue(value string) (reflect.Value, error) {
+    i, err := strconv.ParseInt(value, 10, 16)
+    return reflect.ValueOf(i), err
+}*/
+
+// TODO parse bools, floats, special string types, etc
