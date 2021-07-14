@@ -19,7 +19,23 @@ N.B.B. **this software is not production ready and is subject to sweeping change
 
 ## Features
 
-- [ ] Opening HUD for viewing
+- [ ] Opening HUD for readonly viewing - https://github.com/dresswithpockets/PocketHud/issues/1
+    - [ ] Render controls
+        - [ ] Label
+        - [ ] CExLabel
+        - [ ] Button
+        - [ ] ImageButton
+        - [ ] CExButton
+        - [ ] CExImageButton
+        - [ ] ImagePanel
+        - [ ] EditablePanel
+    - [ ] Schemes
+    - [ ] Menus
+        - [ ] Menu/view selection
+        - [ ] Scene backgrounds
+    - [ ] Reactive layout
+        - [ ] Aspect ratio selection
+        - [ ] Platform flag simulation
 - [ ] Opening HUD for editing
 
 N.B. the roadmap has not been fleshed out, so this section is lacking for now.
