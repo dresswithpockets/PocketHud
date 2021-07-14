@@ -13,12 +13,13 @@ type LaunchSettings struct {
 }
 
 type App struct {
-    launchSettings LaunchSettings
+    launchSettings *LaunchSettings
 
     vguiProvider    VguiProvider
     pictureProvider PictureProvider
 
-    rootControl RootControl
+    controlProvider *ControlProvider
+    rootControl     *RootControl
 
     window *pixelgl.Window
     batch  *pixel.Batch
@@ -34,7 +35,7 @@ func (a *App) run() {
     // initialize graphics context and window
     cfg := pixelgl.WindowConfig{
         Title:     "PocketHud: VGUI Hud Editor",
-        Bounds:    pixel.R(0, 0, 1024, 768),
+        Bounds:    pixel.R(0, 0, 1280, 720),
         Resizable: true,
         VSync:     true,
     }

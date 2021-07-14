@@ -9,10 +9,11 @@ import (
     "os"
 )
 
-func getPrintUsage(flagSet *FlagSet)
-func printUsage() {
-    fmt.Printf("Usage: %s [options...] <hudpath>\n", os.Args[0])
-    flag.PrintDefaults()
+func getPrintUsage(flagSet *flag.FlagSet) func() {
+    return func() {
+        fmt.Printf("Usage: %s [options...] <hudpath>\n", os.Args[0])
+        flagSet.PrintDefaults()
+    }
 }
 
 func main() {
@@ -21,7 +22,7 @@ func main() {
 
     // parse arguments for our app state
     flagSet := flag.NewFlagSet("", flag.ExitOnError)
-    flagSet.Usage = printUsage
+    flagSet.Usage = getPrintUsage(flagSet)
 
     flagSet.BoolVar(&launchSettings.readonly, "readonly", false, "Launch editor in readonly mode. Huds cannot be altered or saved in this mode, only viewed.")
     flagSet.BoolVar(&launchSettings.verbose, "verbose", false, "Detailed logging.")
@@ -45,12 +46,13 @@ func main() {
 
     // the state of the application
     app := &App{
-        launchSettings,
+        &launchSettings,
 
         &SourceVguiProvider{map[string]*vgui.Object{}, hudSourceProvider},
         &SourcePictureProvider{map[string]pixel.Picture{}, hudSourceProvider},
 
-        RootControl{},
+        &ControlProvider{},
+        &RootControl{},
 
         nil,
         nil,
