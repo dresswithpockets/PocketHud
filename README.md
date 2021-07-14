@@ -54,3 +54,11 @@ $ go run github.com/dresswithpockets/PocketHud
 ## Downloading/Installing
 
 There are no pre-built releases for download at the moment. This software is still WIP and is not ready for general use.
+
+## Supporting Development
+
+This project takes a substantial amount of time to maintain; if you find this tool useful and want to support its development, please consider contributing or tipping.
+
+The best way to support the development of this project is to contribute to the codebase.
+
+Otherwise, shoot me a tip at [ko-fi.com/dresswithpockets](https://ko-fi.com/dresswithpockets). Anything at all really helps!
