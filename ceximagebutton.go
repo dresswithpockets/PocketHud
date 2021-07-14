@@ -2,6 +2,13 @@ package main
 
 type CExImageButton struct {
     BaseControl
+    soundDepressed  string
+    soundReleased   string
+    borderDefault   *SchemeBorder
+    borderArmed     *SchemeBorder
+    paintBackground bool
+
+    overrides *CExImageButton
 }
 
 func (c *CExImageButton) draw() {
