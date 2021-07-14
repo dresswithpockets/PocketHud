@@ -36,7 +36,7 @@ N.B.B. **this software is not production ready and is subject to sweeping change
     - [ ] Reactive layout
         - [ ] Aspect ratio selection
         - [ ] Platform flag simulation
-- [ ] Opening HUD for editing
+- [ ] Opening HUD for editing - https://github.com/dresswithpockets/PocketHud/issues/2
 
 N.B. the roadmap has not been fleshed out, so this section is lacking for now.
 
