@@ -6,7 +6,15 @@ import (
     "golang.org/x/image/colornames"
 )
 
+type LaunchSettings struct {
+    path     string
+    readonly bool
+    verbose  bool
+}
+
 type App struct {
+    launchSettings LaunchSettings
+
     vguiProvider    VguiProvider
     pictureProvider PictureProvider
 
