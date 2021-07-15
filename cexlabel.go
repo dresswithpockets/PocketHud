@@ -1,4 +1,4 @@
-package main
+package editor
 
 type CExLabel struct {
     BaseControl

@@ -1,4 +1,4 @@
-package main
+package editor
 
 type CExButton struct {
     BaseControl

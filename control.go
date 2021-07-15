@@ -1,4 +1,4 @@
-package main
+package editor
 
 import (
     . "github.com/ahmetb/go-linq"

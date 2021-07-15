@@ -20,22 +20,32 @@ N.B.B. **this software is not production ready and is subject to sweeping change
 ## Features
 
 - [ ] Opening HUD for readonly viewing - https://github.com/dresswithpockets/PocketHud/issues/1
-    - [ ] Render controls
+    - [ ] VGUI Backend
+        - [ ] Surface (Target Painting & Layout)
+        - [ ] Panel
+        - [ ] Drawing Targets (Image, TextImage)
+    - [ ] VGUI Base Controls
         - [ ] Label
-        - [ ] CExLabel
+        - [ ] URLLabel
         - [ ] Button
         - [ ] ImageButton
-        - [ ] CExButton
-        - [ ] CExImageButton
         - [ ] ImagePanel
         - [ ] EditablePanel
+        - [ ] and more...
+    - [ ] TF2 Extended Controls
+        - [ ] CExLabel
+        - [ ] CExButton
+        - [ ] CExImageButton
+        - [ ] CExRichText
+        - [ ] CExplanationPopup
+        - [ ] and more...
     - [ ] Schemes
     - [ ] Menus
         - [ ] Menu/view selection
         - [ ] Scene backgrounds
     - [ ] Reactive layout
-        - [ ] Aspect ratio selection
-        - [ ] Platform flag simulation
+        - [ ] Aspect-ratio selection
+    - [ ] Simulation
 - [ ] Opening HUD for editing - https://github.com/dresswithpockets/PocketHud/issues/2
 
 N.B. the roadmap has not been fleshed out, so this section is lacking for now.
