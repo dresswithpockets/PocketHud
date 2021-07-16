@@ -232,14 +232,17 @@ func (p *Panel) ComputeWidth(object *vgui.Object, parentSize Size, computingOthe
 
         if p.buildModeFlags.Has(BuildModeSaveWideProportionalTall) {
             // TODO: GetProportionalScaledValueEx
+            warningLogger.Println("Cannot handle Proportional width when computing panel size: GetProportionalScaledValueEx not implemented.")
         } else if p.buildModeFlags.Has(BuildModeSaveWideProportional) {
             // TODO GetProportionalScaledValueEx
+            warningLogger.Println("Cannot handle Proportional width when computing panel size: GetProportionalScaledValueEx not implemented.")
         } else if p.buildModeFlags.Has(BuildModeSaveWideProportionalSelf) {
             width = p.GetSize().width * int16(wideInt)
         } else {
             if p.IsProportional() {
                 // scale the width up to our screen coords
                 // TODO GetProportionalScaledValueEx
+                warningLogger.Println("Cannot handle Proportional width when computing panel size: GetProportionalScaledValueEx not implemented.")
             }
 
             // correct the alignment
@@ -265,6 +268,7 @@ func (p *Panel) ComputeHeight(object *vgui.Object, parentSize Size, computingOth
                 tall = tall[1:]
                 if computingOther {
                     // TODO Wide and Tall of panel %s are set to be each other! (see: vgui2\vgui_controls\Panel.cpp:8656
+                    // TODO panel name
                     return 0
                 }
 
@@ -296,14 +300,17 @@ func (p *Panel) ComputeHeight(object *vgui.Object, parentSize Size, computingOth
 
         if p.buildModeFlags.Has(BuildModeSaveTallProportionalWide) {
             // TODO: GetProportionalScaledValueEx
+            warningLogger.Println("Cannot handle Proportional height when computing panel size: GetProportionalScaledValueEx not implemented.")
         } else if p.buildModeFlags.Has(BuildModeSaveTallProportional) {
             // TODO GetProportionalScaledValueEx
+            warningLogger.Println("Cannot handle Proportional height when computing panel size: GetProportionalScaledValueEx not implemented.")
         } else if p.buildModeFlags.Has(BuildModeSaveWideProportionalSelf) {
             height = p.GetSize().height * int16(tallInt)
         } else {
             if p.IsProportional() {
-                // scale the width up to our screen coords
+                // scale the height up to our screen coords
                 // TODO GetProportionalScaledValueEx
+                warningLogger.Println("Cannot handle Proportional height when computing panel size: GetProportionalScaledValueEx not implemented.")
             }
 
             // correct the alignment
@@ -362,6 +369,7 @@ func (p *Panel) ComputePos(object *vgui.Object, pos int16, size int16, parentSiz
 
         if p.IsProportional() {
             // TODO: GetProportionalScaledValueEx
+            warningLogger.Println("Cannot handle Proportional layout when computing the panels position: GetProportionalScaledValueEx not implemented.")
         }
 
         if flags.Has(flagProportionalSelf) {
