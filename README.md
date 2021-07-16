@@ -21,10 +21,10 @@ N.B.B. **this software is not production ready and is subject to sweeping change
 
 - [ ] Opening HUD for readonly viewing - https://github.com/dresswithpockets/PocketHud/issues/1
     - [ ] VGUI Backend
-        - [ ] Surface (Target Painting & Layout)
-        - [ ] Panel
+        - [ ] Surface (Target Painting & Layout) - https://github.com/dresswithpockets/PocketHud/issues/3
+        - [ ] Panel base control implementation - https://github.com/dresswithpockets/PocketHud/issues/4
         - [ ] Drawing Targets (Image, TextImage)
-        - [ ] Incomplete-Feature Logging
+        - [ ] Incomplete-Feature Logging - https://github.com/dresswithpockets/PocketHud/issues/5
     - [ ] VGUI Base Controls
         - [ ] Label
         - [ ] URLLabel
