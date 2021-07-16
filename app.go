@@ -6,6 +6,8 @@ import (
     "golang.org/x/image/colornames"
 )
 
+type Flag int
+
 type LaunchSettings struct {
     path     string
     readonly bool
@@ -28,6 +30,11 @@ type App struct {
 type RootControl struct {
     BaseControl
 }
+
+func (f *Flag) Set(flag Flag)      { *f |= flag }
+func (f *Flag) Clear(flag Flag)    { *f &= ^flag }
+func (f *Flag) Toggle(flag Flag)   { *f ^= flag }
+func (f *Flag) Has(flag Flag) bool { return *f&flag != 0 }
 
 func (r *RootControl) draw() {}
 
