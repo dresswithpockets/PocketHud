@@ -13,7 +13,7 @@ Open up a HUD in readonly mode:
 $ go run github.com/dresswithpockets/PocketHud -- --root "path/to/my/hud" --readonly
 ```
 
-N.B. as noted in the foreword, this software only worked in readonly mode. Attempting to run PocketHud in editmode (or without the --readonly flag) will panic and close immediately.
+N.B. as noted in the foreword, this software only works in readonly mode. Attempting to run PocketHud in editmode (or without the --readonly flag) will panic and close immediately.
 
 N.B.B. **this software is not production ready and is subject to sweeping changes at any moment.** Versions are likely to be incompatible between each other. Compatibility and long term support will be the end goal after v1.0.
 
@@ -24,6 +24,7 @@ N.B.B. **this software is not production ready and is subject to sweeping change
         - [ ] Surface (Target Painting & Layout)
         - [ ] Panel
         - [ ] Drawing Targets (Image, TextImage)
+        - [ ] Incomplete-Feature Logging
     - [ ] VGUI Base Controls
         - [ ] Label
         - [ ] URLLabel
