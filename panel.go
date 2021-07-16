@@ -86,9 +86,12 @@ type Panel struct {
 
     panelFlags     Flag
     buildModeFlags Flag
+    enabled        bool
 
-    size Size
-    pos Position
+    size    Size
+    pos     Position
+    zpos    int16
+    visible bool
 }
 
 func (p *Panel) ApplySettings(object *vgui.Object) {
@@ -100,7 +103,7 @@ func (p *Panel) ApplySettings(object *vgui.Object) {
 
     p.buildModeFlags.Clear(BuildModeSaveXposRightAligned |
         BuildModeSaveXposCenterAligned |
-        BuildModeSaveYposRightAligned |
+        BuildModeSaveYposBottomAligned |
         BuildModeSaveYposCenterAligned |
         BuildModeSaveWideFull |
         BuildModeSaveTallFull |
@@ -118,10 +121,10 @@ func (p *Panel) ApplySettings(object *vgui.Object) {
 
     // get the position
     alignScreenSize := p.surface.GetSize()
-    screenSize := alignScreenSize
+    // TODO screenSize := alignScreenSize for proportional/test title safe area
     // TODO fullscreen dimensions by removing override?
 
-    parentPos := Position{0,0}
+    // TODO parentPos := Position{0, 0} for proportional/test title safe area
 
     // flag to cause windows to get screenSize from their parents,
     // this allows children windows to use fill and right/bottom alignment even
@@ -130,7 +133,7 @@ func (p *Panel) ApplySettings(object *vgui.Object) {
         p.buildModeFlags.Set(BuildModeSaveProportionalToParent)
         if p.parent != nil {
             bounds := p.parent.GetBounds()
-            parentPos = bounds.Position
+            // TODO parentPos = bounds.Position for proportional/test title safe area
             alignScreenSize = bounds.Size
         }
     }
@@ -148,9 +151,30 @@ func (p *Panel) ApplySettings(object *vgui.Object) {
         pos.y = y
     }
 
-    usesTitleSafeArea := false
+    // TODO usedTitleSafeArea, panel title safe area, x360 mode
 
-    // TODO panel_test_title_safe
+    // TODO navigation simulation (SetNavX where X is Up/Down/Left/Right/etc) for `navX` resource properties
+
+    p.SetPos(pos)
+
+    if zpos, ok := object.GetInt("zpos"); ok {
+        p.SetZPos(int16(zpos))
+    }
+
+    // TODO: if UsesTitleSafeArea, handle WIDE_FULL, TALL_FULL build flags & mutate size based on those flags
+
+    p.SetSize(size)
+
+    // NOTE this has to happen after pos + size is set
+    // TODO ApplyAutoResizeSettings(object)
+
+    if object.GetBoolD("IgnoreScheme", false) {
+        // TODO PerformApplySchemeSettings
+    }
+
+    // panel state
+    p.SetVisible(object.GetBoolD("visible", true))
+    p.SetEnabled(object.GetBoolD("enabled", true))
 
     // TODO panel ApplySettings
 }
@@ -195,7 +219,7 @@ func (p *Panel) ComputeWidth(object *vgui.Object, parentSize Size, computingOthe
             }
         }
 
-        wideInt, err := strconv.ParseInt(wide, 10,16)
+        wideInt, err := strconv.ParseInt(wide, 10, 16)
         if err != nil {
             // just do what atof does - vgui source uses atof and atoi, but the input is always an integer so just mix
             // the two here basically
@@ -259,7 +283,7 @@ func (p *Panel) ComputeHeight(object *vgui.Object, parentSize Size, computingOth
             }
         }
 
-        tallInt, err := strconv.ParseInt(tall, 10,16)
+        tallInt, err := strconv.ParseInt(tall, 10, 16)
         if err != nil {
             // just do what atof does - vgui source uses atof and atoi, but the input is always an integer so just mix
             // the two here basically
@@ -352,7 +376,7 @@ func (p *Panel) ComputePos(object *vgui.Object, pos int16, size int16, parentSiz
         if flags.Has(flagRightAlign) {
             newPos = parentSize - posDelta
         } else if flags.Has(flagCenterAlign) {
-            newPos = parentSize / 2 + posDelta
+            newPos = parentSize/2 + posDelta
         } else {
             newPos = posDelta
         }
@@ -395,6 +419,49 @@ func (p *Panel) GetSize() Size {
     return p.size
 }
 
+func (p *Panel) SetSize(size Size) {
+    // TODO vpanel minimum size
+    if p.size == size {
+        return
+    }
+    p.size = size
+    // TODO OnSizeChanged event
+}
+
 func (p *Panel) GetPos() Position {
     return p.pos
+}
+
+func (p *Panel) SetPos(pos Position) {
+    p.pos = pos
+}
+
+func (p *Panel) GetZPos() int16 {
+    return p.zpos
+}
+
+func (p *Panel) SetZPos(z int16) {
+    p.zpos = z
+}
+
+func (p *Panel) SetVisible(visible bool) {
+    if p.visible == visible {
+        return
+    }
+
+    // TODO surface->SetPanelVisible (in case special window processing needs to occur)?
+
+    p.visible = visible
+
+    // TODO if IsPopup, CalculateMouseVisible() ?
+}
+
+func (p *Panel) SetEnabled(enabled bool) {
+    if p.enabled == enabled {
+        return
+    }
+
+    p.enabled = enabled
+    // TODO InvalidateLayout(false)
+    // TODO Repaint()
 }
