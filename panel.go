@@ -3,6 +3,8 @@ package main
 import (
     "github.com/dresswithpockets/go-vgui"
     "github.com/faiface/pixel"
+    "github.com/faiface/pixel/imdraw"
+    "image/color"
     "strconv"
     "strings"
     "unicode"
@@ -65,6 +67,16 @@ const (
     OpSet
 )
 
+type RoundCorner int
+
+const (
+    RoundCornerTopLeft RoundCorner = 1 << iota
+    RoundCornerTopRight
+    RoundCornerBottomLeft
+    RoundCornerBottomRight
+    RoundCornerAll = RoundCornerTopLeft | RoundCornerTopRight | RoundCornerBottomLeft | RoundCornerBottomRight
+)
+
 type Surface struct {
     target pixel.Picture
     aspect AspectRatio
@@ -79,19 +91,37 @@ func (s *Surface) GetSize() Size {
     return Size{w, h}
 }
 
-type Panel struct {
-    surface *Surface
-    parent  *Panel
-    target  pixel.Picture
+type Inset struct {
+    left, top, right, bottom int
+}
 
+type Panel struct {
+    surface  *Surface
+    parent   *Panel
+    children []*Panel
+    target   pixel.Target
+    scheme   *Scheme
+
+    panelName      string
     panelFlags     Flag
     buildModeFlags Flag
     enabled        bool
 
-    size    Size
-    pos     Position
-    zpos    int16
-    visible bool
+    border              *SchemeBorder
+    paintBackgroundType BackgroundType
+
+    size           Size
+    pos            Position
+    zpos           int16
+    visible        bool
+    inset          Inset
+    roundedCorners RoundCorner
+    fgColor        color.Color
+    bgColor        color.Color
+
+    mouseInput  bool
+    kbInput     bool
+    tabPosition int
 }
 
 func (p *Panel) ApplySettings(object *vgui.Object) {
@@ -176,7 +206,124 @@ func (p *Panel) ApplySettings(object *vgui.Object) {
     p.SetVisible(object.GetBoolD("visible", true))
     p.SetEnabled(object.GetBoolD("enabled", true))
 
-    // TODO panel ApplySettings
+    p.SetMouseInputEnabled(object.GetBoolD("mouseinputenabled", true))
+
+    p.SetTabPosition(object.GetIntD("tabPosition", 0))
+
+    // TODO tooltiptext
+
+    paintBackground := object.GetIntD("paintbackground", -1)
+    if paintBackground >= 0 {
+        p.SetPaintBackgroundEnabled(paintBackground != 0)
+    }
+
+    paintBorder := object.GetIntD("paintborder", -1)
+    if paintBorder >= 0 {
+        p.SetPaintBorderEnabled(paintBorder != 0)
+    }
+
+    if border, ok := object.GetString("border"); ok {
+        p.SetBorder(p.GetScheme().GetBorder(border))
+    }
+
+    if newName, ok := object.GetString("fieldName"); ok {
+        p.SetName(newName)
+    }
+
+    // TODO actionsignallevel (telemetry)
+
+    // TODO forceStereoRenderToFrameBuffer
+
+    // this is a flag int, can be anything between 0b0 and 0b1000. See: type RoundCorner
+    if roundedCorners, ok := object.GetInt("RoundedCorners"); ok {
+        p.roundedCorners = RoundCorner(roundedCorners)
+    }
+
+    // TODO pin corners to siblings/siblings to corners
+    // TODO overridableColorEntries
+
+    p.SetKeyboardInputEnabled(object.GetBoolD("keyboardinputenabled", true))
+
+    // TODO OnChildSettingsApplied event
+}
+
+func (p *Panel) PaintTraverse() {
+    // TODO
+}
+
+func (p *Panel) PaintBorder() {
+    if p.border == nil {
+        return
+    }
+    p.border.PaintFromPanel(p)
+}
+
+func (p *Panel) PaintBackground() {
+    size := p.GetSize()
+    // TODO SkipChild?
+    // if ( m_SkipChild.Get() && m_SkipChild->IsVisible() ) {}
+    // else
+    {
+        vTopLeft := pixel.ZV
+        vBottomRight := vTopLeft.Add(size.Vec())
+        topLeft := vguiToPixelCoords(vTopLeft)
+        bottomRight := vguiToPixelCoords(vBottomRight)
+        topRight := pixel.V(bottomRight.X, topLeft.Y)
+        bottomLeft := pixel.V(topLeft.X, bottomRight.Y)
+        switch p.paintBackgroundType {
+        case BgFilled:
+            p.DrawFilledBox(p.bgColor, topLeft, topRight, bottomRight, bottomLeft)
+        case BgTextured:
+            p.DrawTexturedBox(p.bgColor, 1, topLeft, topRight, bottomRight, bottomLeft)
+        case BgRoundedCorners:
+            p.DrawBox(p.bgColor, 1, topLeft, topRight, bottomRight, bottomLeft)
+            // TODO case 3 DrawBoxFade? this seems to be explicitly unsupported by the vgui Panel type, but maybe its allowed in child types
+        }
+    }
+}
+
+func (p *Panel) DrawFilledBox(col color.Color, corners ...pixel.Vec) {
+    d := imdraw.New(nil)
+    d.SetColorMask(col)
+    // push the corners of the rectangle to be filled
+    d.Push(corners...)
+    // draw filled rectangle
+    d.Rectangle(0)
+}
+
+func (p *Panel) DrawTexturedBox(col color.Color, normalizedAlpha float64, corners ...pixel.Vec) {
+
+    r, g, b, a := col.RGBA()
+    a = uint32(float64(a) / 255.0 * normalizedAlpha)
+    col = color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
+
+    // TODO background texture/image
+    d := imdraw.New(nil)
+    d.SetColorMask(col)
+    d.Push(corners...)
+    d.Draw(p.target)
+}
+
+func (p *Panel) DrawBox(col color.Color, normalizedAlpha float64, corners ...pixel.Vec) {
+    // TODO: Draw Textured Rounded Box
+}
+
+func (p *Panel) Paint() {}
+
+func (p *Panel) SetName(panelName string) {
+    p.panelName = panelName
+}
+
+func (p *Panel) GetScheme() *Scheme {
+    if p.scheme != nil {
+        return p.scheme
+    }
+
+    if p.parent != nil {
+        return p.parent.GetScheme()
+    }
+
+    return GetDefaultScheme()
 }
 
 func (p *Panel) GetBounds() Bounds {
@@ -472,4 +619,66 @@ func (p *Panel) SetEnabled(enabled bool) {
     p.enabled = enabled
     // TODO InvalidateLayout(false)
     // TODO Repaint()
+}
+
+func (p *Panel) SetMouseInputEnabled(enabled bool) {
+    p.mouseInput = enabled
+    // TODO surface()->CalculateMouseVisible()
+}
+
+func (p *Panel) SetKeyboardInputEnabled(enabled bool) {
+    p.kbInput = enabled
+    for _, child := range p.children {
+        child.SetKeyboardInputEnabled(enabled)
+    }
+    // TODO if turning kb input off, make sure this panel is not the current focus of a parent panel
+}
+
+func (p *Panel) GetTabPosition() int {
+    return p.tabPosition
+}
+
+func (p *Panel) SetTabPosition(position int) {
+    p.tabPosition = position
+}
+
+func (p *Panel) SetPaintBackgroundEnabled(enabled bool) {
+    if enabled {
+        p.panelFlags.Set(PanelPaintBackgroundEnabled)
+    } else {
+        p.panelFlags.Clear(PanelPaintBackgroundEnabled)
+    }
+}
+
+func (p *Panel) SetPaintBorderEnabled(enabled bool) {
+    if enabled {
+        p.panelFlags.Set(PanelPaintBorderEnabled)
+    } else {
+        p.panelFlags.Clear(PanelPaintBorderEnabled)
+    }
+}
+
+func (p *Panel) GetInset() Inset {
+    return p.inset
+}
+
+func (p *Panel) SetInset(inset Inset) {
+    p.inset = inset
+}
+
+func (p *Panel) SetBorder(border *SchemeBorder) {
+    p.border = border
+
+    if border != nil {
+        p.SetInset(border.inset)
+
+        // update background type based on the border
+        p.SetPaintBackgroundType(border.backgroundType)
+    } else {
+        p.SetInset(Inset{0, 0, 0, 0})
+    }
+}
+
+func (p *Panel) SetPaintBackgroundType(backgroundType BackgroundType) {
+    p.paintBackgroundType = backgroundType
 }
