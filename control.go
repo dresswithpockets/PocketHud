@@ -1,4 +1,4 @@
-package editor
+package main
 
 import (
     . "github.com/ahmetb/go-linq"
@@ -44,8 +44,8 @@ type ControlPosition struct {
 }
 
 type Position struct {
-    x int
-    y int
+    x int16
+    y int16
 }
 
 type Size struct {
@@ -70,6 +70,7 @@ type ControlProvider struct {
 }
 
 type Control interface {
+    applySettings(object *vgui.Object)
     zOrder() int
     draw()
     drawChildren()
@@ -112,6 +113,14 @@ type BaseControl struct {
     baseOverride *BaseControl
 }
 
+func (p Position) Vec() pixel.Vec {
+    return pixel.V(float64(p.x), float64(p.y))
+}
+
+func (s Size) Vec() pixel.Vec {
+    return pixel.V(float64(s.width), float64(s.height))
+}
+
 func (c *ControlProvider) setBuilder(controlName string, builder ControlBuilder) {
     c.builders[controlName] = builder
 }
@@ -131,6 +140,10 @@ func (c *ControlProvider) resolveNewControlFromObject(object *vgui.Object) (Cont
     }
 
     return nil, &ErrUnknownControlName{controlName.Value}
+}
+
+func (c *BaseControl) applySettings(object *vgui.Object) {
+    panic("applySettings not implemented on abstract BaseControl")
 }
 
 func (c *BaseControl) zOrder() int {
